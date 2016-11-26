@@ -1,5 +1,17 @@
-var restify = require('restify');
-var builder = require('botbuilder');
+/*-----------------------------------------------------------------------------
+A speech to text bot for the Microsoft Bot Framework. 
+-----------------------------------------------------------------------------*/
+
+// This loads the environment variables from the .env file
+require('dotenv-extended').load();
+
+const builder = require("botbuilder"),
+    fs = require("fs"),
+    needle = require("needle"),
+    restify = require("restify"),
+    request = require("request"),
+    speechService = require("./speech-service.js"),
+    url = require("url");
 
 var gitlab = require('node-gitlab');
 
@@ -8,18 +20,19 @@ var gitlab = require('node-gitlab');
 //=========================================================
 
 // Setup Restify Server
-var server = restify.createServer();
-server.listen(process.env.port || process.env.PORT || 3978, function () {
-   console.log('%s listening to %s', server.name, server.url); 
+const server = restify.createServer();
+server.listen(process.env.port || process.env.PORT || 3979, () => {
+    console.log("%s listening to %s", server.name, server.url);
 });
-  
+
 // Create chat bot
-var connector = new builder.ChatConnector({
+const connector = new builder.ChatConnector({
     appId: process.env.MICROSOFT_APP_ID,
     appPassword: process.env.MICROSOFT_APP_PASSWORD
 });
-var bot = new builder.UniversalBot(connector);
-server.post('/api/messages', connector.listen());
+
+const bot = new builder.UniversalBot(connector);
+server.post("/api/messages", connector.listen());
 
 //========================================================
 // GitLab API Setup
