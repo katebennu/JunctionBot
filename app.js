@@ -1,7 +1,7 @@
 var restify = require('restify');
 var builder = require('botbuilder');
 
-//=========================================================
+//========================================================
 // Bot Setup
 //=========================================================
 
@@ -23,6 +23,24 @@ server.post('/api/messages', connector.listen());
 // Bots Dialogs
 //=========================================================
 
-bot.dialog('/', function (session) {
-    session.send("Hello World");
-});
+bot.dialog('/', new builder.IntentDialog()
+	//if no conversation opened yet or conversation was closed before
+    .onBegin(function (session, args, next) {
+    	//Begin conversation
+    	session.send('Hello'); 
+        next();//<- also try matching:
+    }).matches(/^add (.*)/i, function (session, args) {
+        // change default city
+        var note = args.matched[1].trim();
+        session.send('note "%s" will be added to backlog.', note);
+
+    }).matches(/^forget it/i, function (session, args) {
+        // change user's city
+        session.send('ok, i will empty the backlog');
+        session.endDialog();
+    }).onDefault(function (session) {//If none of the previous matched:
+        // perform search
+        var messageText = session.message.text.trim();
+        session.send('Here is what you said: %s', messageText);//<- just some simple echo
+    }));
+
